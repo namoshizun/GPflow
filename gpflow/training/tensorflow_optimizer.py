@@ -130,6 +130,8 @@ class _TensorFlowOptimizer(optimizer.Optimizer):
                         yield slot
         extra_vars = [v for v in self.optimizer.__dict__.values() if isinstance(v, tf.Variable)]
         optimizer_vars = list(get_optimizer_slots())
+        if isinstance(self.optimizer, tf.train.AdamOptimizer):
+            optimizer_vars.extend(self.optimizer._get_beta_accumulators())
         full_var_list = list(set(optimizer_vars + extra_vars))
         misc.initialize_variables(full_var_list, session=session, force=False)
 
