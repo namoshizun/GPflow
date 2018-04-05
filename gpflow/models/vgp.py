@@ -189,11 +189,19 @@ class VGP_opper_archambeau(GPModel):
         """
         if not self.num_data == self.X.shape[0]:
             self.num_data = self.X.shape[0]
-            self.q_alpha = Parameter(np.zeros((self.num_data, self.num_latent)))
-            self.q_lambda = Parameter(np.ones((self.num_data, self.num_latent)),
-                                      transforms.positive)
+            self.q_mu = Parameter(np.zeros((self.num_data, self.num_latent)),
+                **self._copy_parameter_options(self.q_mu))
+            self.q_sqrt = Parameter(np.array([np.eye(self.num_data) for _ in range(self.num_latent)]),
+                **self._copy_parameter_options(self.q_sqrt))
         return super(VGP_opper_archambeau, self).compile(session=session)
 
+    
+    def _copy_parameter_options(self, param):
+        transform = param.transform
+        if isinstance(transform, transforms.LowerTriangular):
+            transform = transforms.LowerTriangular(self.num_data, self.num_latent)
+        return dict(prior=param.prior, transform=transform, trainable=param.trainable, dtype=param.dtype)
+    
     @params_as_tensors
     def _build_likelihood(self):
         """
