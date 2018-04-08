@@ -84,6 +84,10 @@ class _SettingsManager(object):
     def int_type(self):
         return self.dtypes.int_type
 
+    @property
+    def optimisation_verb(self):
+        return self.verbosity.optimisation_verb
+
 
 class _MutableNamedTuple(OrderedDict):
     """

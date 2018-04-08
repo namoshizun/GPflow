@@ -22,6 +22,8 @@ from __future__ import print_function
 
 import numpy as np
 
+from .. import settings
+
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import array_ops
 from tensorflow.python.ops import gradients
@@ -434,12 +436,13 @@ class ScipyOptimizerInterface(ExternalOptimizerInterface):
 
     import scipy.optimize  # pylint: disable=g-import-not-at-top
     result = scipy.optimize.minimize(*minimize_args, **minimize_kwargs)
-    logging.info('Optimization terminated with:\n'
-                 '  Message: %s\n'
-                 '  Objective function value: %f\n'
-                 '  Number of iterations: %d\n'
-                 '  Number of functions evaluations: %d', result.message,
-                 result.fun, result.nit, result.nfev)
+    if settings.optimisation_verb:
+      logging.info('Optimization terminated with:\n'
+                   '  Message: %s\n'
+                   '  Objective function value: %f\n'
+                   '  Number of iterations: %d\n'
+                   '  Number of functions evaluations: %d', result.message,
+                   result.fun, result.nit, result.nfev)
 
     return result['x']
 
