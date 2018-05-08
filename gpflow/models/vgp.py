@@ -80,11 +80,18 @@ class VGP(GPModel):
         """
         if not self.num_data == self.X.shape[0]:
             self.num_data = self.X.shape[0]
-            self.q_mu = Parameter(np.zeros((self.num_data, self.num_latent)))
-            self.q_sqrt = Parameter(np.eye(self.num_data)[:, :, None] *
-                                    np.ones((1, 1, self.num_latent)))
-
+            self.q_mu = Parameter(np.zeros((self.num_data, self.num_latent)),
+                **self._copy_parameter_options(self.q_mu))
+            self.q_sqrt = Parameter(np.array([np.eye(self.num_data) for _ in range(self.num_latent)]),
+                **self._copy_parameter_options(self.q_sqrt))
         return super(VGP, self).compile(session=session)
+
+    
+    def _copy_parameter_options(self, param):
+        transform = param.transform
+        if isinstance(transform, transforms.LowerTriangular):
+            transform = transforms.LowerTriangular(self.num_data, self.num_latent)
+        return dict(prior=param.prior, transform=transform, trainable=param.trainable, dtype=param.dtype)
 
     @params_as_tensors
     def _build_likelihood(self):
